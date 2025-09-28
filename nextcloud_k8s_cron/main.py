@@ -1,3 +1,4 @@
+import sys
 from loguru import logger
 from kubernetes import client
 from kubernetes import config as kube_config
@@ -33,6 +34,7 @@ def run_cron_jon(nextcloud_pod: str) -> str:
                 name=nextcloud_pod,
                 namespace=config.namespace,
                 command=config.command,
+                stderr=True,
                 stdout=True,
             )
             return response
@@ -44,6 +46,15 @@ def run_cron_jon(nextcloud_pod: str) -> str:
 
 
 def main():
+    # Set up logger.
+    logger.remove()
+    logger.add(
+        sys.stderr,
+        format="{time} {level} {message}",
+        filter="nextcloud_k8s_cron",
+        level="INFO",
+    )
+
     logger.info("Starting cron job.")
     logger.info(f"Namespace: {config.namespace}; label: {config.pod_label}")
 
@@ -52,4 +63,8 @@ def main():
     nextcloud_pod = get_nextcloud_pod()
     logger.info(f"Found nextcloud pod: {nextcloud_pod}")
 
-    logger.info(f"Output: {run_cron_jon(nextcloud_pod)}")
+    response = run_cron_jon(nextcloud_pod)
+    if response:
+        logger.error(f"Error running cron job: {response}")
+    else:
+        logger.info("Succesfully executed cron job.")
