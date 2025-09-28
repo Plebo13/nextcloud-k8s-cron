@@ -58,7 +58,7 @@ def main():
     logger.info("Starting cron job.")
     logger.info(f"Namespace: {config.namespace}; label: {config.pod_label}")
 
-    kube_config.load_kube_config()
+    kube_config.load_incluster_config()
 
     nextcloud_pod = get_nextcloud_pod()
     logger.info(f"Found nextcloud pod: {nextcloud_pod}")
