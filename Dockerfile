@@ -1,28 +1,29 @@
 # The builder image, used to build the virtual environment
-FROM python:3.12-bookworm AS builder
+FROM python:3.12-slim-bookworm AS builder
 
-RUN pip install poetry==2.2
+# Python
+ENV PYTHONFAULTHANDLER=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONHASHSEED=random \
+    PIP_NO_CACHE_DIR=off \
+    PIP_DISABLE_PIP_VERSION_CHECK=on \
+    PIP_DEFAULT_TIMEOUT=100
 
+# Poetry
 ENV POETRY_NO_INTERACTION=1 \
-    POETRY_VIRTUALENVS_IN_PROJECT=1 \
-    POETRY_VIRTUALENVS_CREATE=1 \
-    POETRY_CACHE_DIR=/tmp/poetry_cache
+    POETRY_VIRTUALENVS_CREATE=false \
+    POETRY_CACHE_DIR='/var/cache/pypoetry' \
+    POETRY_HOME='/usr/local' \
+    POETRY_VERSION=2.2.1
+
+RUN apt-get update && apt-get install -y curl &&\
+    rm -rf /var/lib/apt/lists/*
+RUN curl -sSL https://install.python-poetry.org | python3 -
 
 WORKDIR /app
 
-COPY pyproject.toml poetry.lock ./
-RUN touch README.md
+COPY . /app
+RUN poetry install --no-ansi &&\
+    rm -rf $POETRY_CACHE_DIR
 
-RUN poetry install --no-root && rm -rf $POETRY_CACHE_DIR
-
-# The runtime image, used to just run the code provided its virtual environment
-FROM python:3.12-slim-bookworm AS runtime
-
-ENV VIRTUAL_ENV=/app/.venv \
-    PATH="/app/.venv/bin:$PATH"
-
-COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
-
-COPY nextcloud_k8s_cron ./nextcloud_k8s_cron
-
-ENTRYPOINT ["python", "-m", "nextcloud_k8s_cron.main"]
+CMD ["poetry", "run", "nextcloud-k8s-cron"]
