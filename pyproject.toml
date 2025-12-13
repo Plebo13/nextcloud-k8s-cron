@@ -1,6 +1,6 @@
 [project]
 name = "nextcloud-k8s-cron"
-version = "0.0.1"
+version = "0.1.0"
 description = "Python script to run the Nextcloud cron on a Kubernetes cluster."
 authors = [{ name = "Lukas Brauckmann", email = "lukas.brauckmann@posteo.de" }]
 license = "MIT"
