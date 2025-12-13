@@ -1,0 +1,24 @@
+[project]
+name = "nextcloud-k8s-cron"
+version = "0.0.1"
+description = "Python script to run the Nextcloud cron on a Kubernetes cluster."
+authors = [{ name = "Lukas Brauckmann", email = "lukas.brauckmann@posteo.de" }]
+license = "MIT"
+readme = "README.md"
+requires-python = ">=3.12,<4.0"
+dependencies = [
+    "loguru (>=0.7.3,<0.8.0)",
+    "pydantic-settings (>=2.11.0,<3.0.0)",
+    "kubernetes (>=33.1.0,<34.0.0)",
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+packages = [{ include = "nextcloud_k8s_cron" }]
+
+[project.scripts]
+nextcloud-k8s-cron = 'nextcloud_k8s_cron.main:main'
