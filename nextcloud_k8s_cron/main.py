@@ -15,14 +15,13 @@ def get_nextcloud_pod() -> str:
         api_instance = client.CoreV1Api(api_client)
         try:
             pod_list = api_instance.list_namespaced_pod(namespace=config.namespace)
+            for pod in pod_list.items:
+                if pod.metadata.labels.get("app") == config.pod_label:
+                    return pod.metadata.name
         except ApiException as e:
             logger.error(
                 "Exception when calling CoreV1Api->list_namespaced_pod: %s\n" % e
             )
-
-        for pod in pod_list.items:
-            if pod.metadata.labels.get("app") == config.pod_label:
-                return pod.metadata.name
 
 
 def run_cron_jon(nextcloud_pod: str) -> str:
@@ -35,7 +34,9 @@ def run_cron_jon(nextcloud_pod: str) -> str:
                 namespace=config.namespace,
                 command=config.command,
                 stderr=True,
+                stdin=False,
                 stdout=True,
+                tty=False,
             )
             return response
         except ApiException as e:

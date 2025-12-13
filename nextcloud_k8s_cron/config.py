@@ -6,6 +6,8 @@ class Config(BaseSettings):
     namespace: str = "nextcloud"
     pod_label: str = "nextcloud"
     command: List[str] = [
+        "/bin/sh",
+        "-c",
         'su -s /bin/sh www-data -c "php -f /var/www/html/cron.php"',
     ]
     log_level: str = "INFO"
